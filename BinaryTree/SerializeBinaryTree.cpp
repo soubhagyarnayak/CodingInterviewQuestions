@@ -7,6 +7,14 @@ struct Node {
 	Node* right;
 };
 
+Node* createNode(int value) {
+	Node* node = new Node();
+	node->value = value;
+	node->left = nullptr;
+	node->right = nullptr;
+	return node;
+}
+
 std::string serialize(Node* root) {
 	std::string result;
 	if (root == nullptr) {
@@ -20,18 +28,36 @@ std::string serialize(Node* root) {
 	return result;
 }
 
-Node* createNode(int value) {
-	Node* node = new Node();
-	node->value = value;
-	node->left = NULL;
-	node->right = NULL;
-	return node;
+void deserialize(Node* &root, std::string serializedData, std::string::size_type &position) {
+	if (position >= serializedData.size()) {
+		return;
+	}
+	auto index = serializedData.find(" ", position);
+	std::string token = serializedData.substr(position, index-position);
+	position += token.size() + 1;
+	if (token.compare("]") == 0) {
+		return;
+	}
+	else {
+		root = createNode(std::stoi(token));
+		deserialize(root->left, serializedData, position);
+		deserialize(root->right, serializedData, position);
+	}
+}
+
+void runTest(Node* root) {
+	Node* retrieved = nullptr; 
+	std::string::size_type position = 0;
+	std::string serializedTree = serialize(root);
+	std::cout << serializedTree << std::endl;
+	deserialize(retrieved, serializedTree, position);
+	std::cout << serialize(retrieved) << std::endl;
 }
 
 int main() {
-	Node* root = NULL;
-	std::string serializedTree = serialize(root);
-	std::cout << serializedTree << std::endl;
+	Node* root = nullptr;
+	runTest(root);
+	
 	root = createNode(100);
 	root->left = createNode(50);
 	root->right = createNode(200);
@@ -41,6 +67,5 @@ int main() {
 	root->right->right = createNode(400);
 	root->right->right->left = createNode(350);
 	root->right->right->left->right = createNode(375);
-	serializedTree = serialize(root);
-	std::cout << serializedTree << std::endl;
+	runTest(root);
 }
